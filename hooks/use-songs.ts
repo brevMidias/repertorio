@@ -33,6 +33,7 @@ export type SongsController = {
   removeSong: (id: string) => void
   moveSong: (fromIndex: number, toIndex: number) => void
   replaceAll: (songs: Song[]) => void
+  restoreAll: (songs: Song[]) => void
 }
 
 /** Lê e normaliza o formato antigo salvo no `localStorage`. */
@@ -199,6 +200,25 @@ export function useSongs(): SongsController {
     [persistInBackground, remember],
   )
 
+  const restoreAll = useCallback(
+    (incoming: Song[]) => {
+      if (!readyRef.current) return
+      const metadata = normalizeSongs(incoming.map(toMetadata))
+      const incomingAudio = new Map(
+        incoming.flatMap((song) => song.audioBlob ? [[song.id, song.audioBlob] as const] : []),
+      )
+      const next = metadata.map((song) => withAudio(song, incomingAudio.get(song.id)))
+
+      revokeAudioUrls(songsRef.current)
+      revokeAudioUrls(incoming)
+      resetAudioEngine()
+      remember(next)
+      writeMetaCache(metadata)
+      persistInBackground(replaceRepertoire(metadata, incomingAudio))
+    },
+    [persistInBackground, remember],
+  )
+
   return {
     songs,
     ready,
@@ -209,5 +229,6 @@ export function useSongs(): SongsController {
     removeSong,
     moveSong,
     replaceAll,
+    restoreAll,
   }
 }

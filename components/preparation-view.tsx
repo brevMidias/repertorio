@@ -1,8 +1,22 @@
 'use client'
 
 import { useRef, useState } from 'react'
-import { CircleCheck, Clock3, Download, FileAudio, Pencil, ShieldCheck, Upload } from 'lucide-react'
+import {
+  CircleCheck,
+  Clock3,
+  Cloud,
+  CloudDownload,
+  CloudUpload,
+  Copy,
+  Download,
+  FileAudio,
+  Link2,
+  Pencil,
+  ShieldCheck,
+  Upload,
+} from 'lucide-react'
 
+import type { CloudSyncController } from '@/hooks/use-cloud-sync'
 import { parseBackup } from '@/lib/backup'
 import { formatBytes, type StorageStatus } from '@/lib/storage-status'
 import type { Song } from '@/lib/types'
@@ -16,6 +30,7 @@ type PreparationViewProps = {
   onExport: () => void
   onImport: (songs: Song[]) => void
   mutationsEnabled: boolean
+  cloud: CloudSyncController
 }
 
 export function PreparationView({
@@ -25,9 +40,13 @@ export function PreparationView({
   onExport,
   onImport,
   mutationsEnabled,
+  cloud,
 }: PreparationViewProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [feedback, setFeedback] = useState<Feedback | null>(null)
+  const [cloudCodeOverride, setCloudCodeOverride] = useState<string | null>(null)
+  const [copied, setCopied] = useState(false)
+  const cloudCode = cloudCodeOverride ?? cloud.cloudKey
 
   const ready = songs.filter((song) => song.status === 'Pronta').length
   const withAudio = songs.filter((song) => song.audioUrl).length
@@ -91,6 +110,21 @@ export function PreparationView({
             <p>
               {ready} de {songs.length} {songs.length === 1 ? 'música' : 'músicas'} marcadas como
               prontas.
+            </p>
+          </div>
+        </div>
+        <div className="prep-card" aria-live="polite">
+          <Cloud size={22} aria-hidden="true" />
+          <div>
+            <strong>Cópia na Vercel</strong>
+            <p>
+              {cloud.busy === 'backup'
+                ? 'Enviando repertório e áudios…'
+                : cloud.busy === 'restore'
+                  ? 'Baixando a cópia para este aparelho…'
+                  : cloud.ready
+                    ? 'Pronta para salvar. O repertório continua disponível offline.'
+                    : 'Preparando o código seguro da nuvem…'}
             </p>
           </div>
         </div>
@@ -178,9 +212,94 @@ export function PreparationView({
       </div>
 
       <p className="muted backup-note">
-        O backup guarda letras, cifras e anotações. Os arquivos de áudio ficam apenas neste
-        dispositivo.
+        O arquivo JSON guarda letras, cifras e anotações. A cópia na Vercel inclui também os
+        áudios; depois de restaurados, eles voltam a ficar disponíveis offline.
       </p>
+
+      <div className="cloud-panel">
+        <div className="cloud-panel-heading">
+          <div>
+            <p className="eyebrow">CÓPIA COMPLETA</p>
+            <h2>Vercel Blob</h2>
+          </div>
+          <div className="cloud-actions">
+            <button
+              type="button"
+              className="primary-button"
+              disabled={!mutationsEnabled || !cloud.ready || cloud.busy !== null}
+              onClick={() => void cloud.backup(songs)}
+            >
+              <CloudUpload size={17} aria-hidden="true" />
+              {cloud.busy === 'backup' ? 'Salvando…' : 'Salvar na Vercel'}
+            </button>
+            <button
+              type="button"
+              className="secondary-button"
+              disabled={!mutationsEnabled || !cloud.ready || cloud.busy !== null}
+              onClick={() => {
+                if (window.confirm('Restaurar substitui o repertório deste aparelho pela cópia da Vercel. Continuar?')) {
+                  void cloud.restore()
+                }
+              }}
+            >
+              <CloudDownload size={17} aria-hidden="true" />
+              {cloud.busy === 'restore' ? 'Restaurando…' : 'Restaurar da Vercel'}
+            </button>
+          </div>
+        </div>
+
+        <p className="muted cloud-explanation">
+          Guarde este código em local seguro. Ele conecta outro celular à mesma cópia privada.
+        </p>
+        <div className="cloud-code-row">
+          <label>
+            Código da nuvem
+            <input
+              value={cloudCode}
+              spellCheck={false}
+              autoCapitalize="none"
+              autoComplete="off"
+              onChange={(event) => {
+                setCopied(false)
+                setCloudCodeOverride(event.target.value)
+              }}
+            />
+          </label>
+          <button
+            type="button"
+            className="secondary-button"
+            disabled={!cloud.cloudKey}
+            onClick={() => {
+              void navigator.clipboard?.writeText(cloud.cloudKey).then(() => setCopied(true))
+            }}
+          >
+            <Copy size={16} aria-hidden="true" />
+            {copied ? 'Copiado' : 'Copiar'}
+          </button>
+          <button
+            type="button"
+            className="secondary-button"
+            disabled={!cloud.ready || cloud.busy !== null}
+            onClick={() => {
+              void cloud.useCloudKey(cloudCode).then((changed) => {
+                if (changed) setCloudCodeOverride(null)
+              })
+            }}
+          >
+            <Link2 size={16} aria-hidden="true" />
+            Usar código
+          </button>
+        </div>
+
+        {cloud.feedback && (
+          <p
+            className={cloud.feedback.tone === 'ok' ? 'import-ok' : 'import-error'}
+            role="status"
+          >
+            {cloud.feedback.message}
+          </p>
+        )}
+      </div>
     </section>
   )
 }

@@ -13,10 +13,12 @@ import type { SongMetadata } from '@/lib/types'
  */
 
 const DB_NAME = 'prime-offline'
-const DB_VERSION = 2
+const DB_VERSION = 3
 const META_STORE = 'songs'
 const AUDIO_STORE = 'audio'
+const SETTINGS_STORE = 'settings'
 const META_KEY = 'meta'
+const CLOUD_KEY = 'cloud-profile-key'
 /** Registro do formato antigo, que guardava tudo junto. */
 const LEGACY_KEY = 'repertorio'
 
@@ -53,6 +55,7 @@ function openDatabase(): Promise<IDBDatabase> {
       const db = request.result
       if (!db.objectStoreNames.contains(META_STORE)) db.createObjectStore(META_STORE)
       if (!db.objectStoreNames.contains(AUDIO_STORE)) db.createObjectStore(AUDIO_STORE)
+      if (!db.objectStoreNames.contains(SETTINGS_STORE)) db.createObjectStore(SETTINGS_STORE)
     }
     request.onsuccess = () => {
       // Se outra aba pedir uma versão maior, soltamos a conexão para não travá-la.
@@ -196,12 +199,31 @@ export async function saveMetadata(songs: readonly SongMetadata[]): Promise<void
  * uma única unidade. Uma gravação de áudio iniciada depois fica enfileirada pelo
  * IndexedDB e, portanto, sobrevive à limpeza da importação.
  */
-export async function replaceRepertoire(songs: readonly SongMetadata[]): Promise<void> {
+export async function replaceRepertoire(
+  songs: readonly SongMetadata[],
+  audio: ReadonlyMap<string, Blob> = new Map(),
+): Promise<void> {
   if (!isAvailable()) return
   const db = await openDatabase()
   const transaction = db.transaction([META_STORE, AUDIO_STORE], 'readwrite')
   transaction.objectStore(META_STORE).put([...songs], META_KEY)
-  transaction.objectStore(AUDIO_STORE).clear()
+  const audioStore = transaction.objectStore(AUDIO_STORE)
+  audioStore.clear()
+  for (const [id, blob] of audio) audioStore.put(blob, id)
+  return whenDone(transaction)
+}
+
+export async function loadCloudKey(): Promise<string | null> {
+  if (!isAvailable()) return null
+  const value = await readValue<unknown>(SETTINGS_STORE, CLOUD_KEY)
+  return typeof value === 'string' ? value : null
+}
+
+export async function saveCloudKey(cloudKey: string): Promise<void> {
+  if (!isAvailable()) return
+  const db = await openDatabase()
+  const transaction = db.transaction(SETTINGS_STORE, 'readwrite')
+  transaction.objectStore(SETTINGS_STORE).put(cloudKey, CLOUD_KEY)
   return whenDone(transaction)
 }
 

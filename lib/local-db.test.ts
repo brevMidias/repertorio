@@ -4,10 +4,12 @@ import { Blob as NodeBlob } from 'node:buffer'
 import {
   clearRepertoire,
   deleteOrphanAudio,
+  loadCloudKey,
   loadAudio,
   loadRepertoire,
   replaceRepertoire,
   saveAudio,
+  saveCloudKey,
   saveMetadata,
 } from '@/lib/local-db'
 import type { SongMetadata } from '@/lib/types'
@@ -77,7 +79,7 @@ function successfulRequest<T>(value: T): IDBRequest<T> {
 }
 
 async function seedLegacyRecord(legacy: unknown[]): Promise<void> {
-  const db = await requestResult(indexedDB.open(DB_NAME, 2))
+  const db = await requestResult(indexedDB.open(DB_NAME, 3))
   const transaction = db.transaction(META_STORE, 'readwrite')
   transaction.objectStore(META_STORE).put(legacy, LEGACY_KEY)
   await transactionDone(transaction)
@@ -85,7 +87,7 @@ async function seedLegacyRecord(legacy: unknown[]): Promise<void> {
 }
 
 async function seedCurrentRecord(value: unknown): Promise<void> {
-  const db = await requestResult(indexedDB.open(DB_NAME, 2))
+  const db = await requestResult(indexedDB.open(DB_NAME, 3))
   const transaction = db.transaction(META_STORE, 'readwrite')
   transaction.objectStore(META_STORE).put(value, META_KEY)
   await transactionDone(transaction)
@@ -93,7 +95,7 @@ async function seedCurrentRecord(value: unknown): Promise<void> {
 }
 
 async function countStoredKey(store: string, key: string): Promise<number> {
-  const db = await requestResult(indexedDB.open(DB_NAME, 2))
+  const db = await requestResult(indexedDB.open(DB_NAME, 3))
   const transaction = db.transaction(store, 'readonly')
   const count = await requestResult(transaction.objectStore(store).count(key))
   await transactionDone(transaction)
@@ -102,7 +104,7 @@ async function countStoredKey(store: string, key: string): Promise<number> {
 }
 
 async function readStoredValue<T>(store: string, key: string): Promise<T | undefined> {
-  const db = await requestResult(indexedDB.open(DB_NAME, 2))
+  const db = await requestResult(indexedDB.open(DB_NAME, 3))
   const transaction = db.transaction(store, 'readonly')
   const value = await requestResult(transaction.objectStore(store).get(key))
   await transactionDone(transaction)
@@ -177,6 +179,25 @@ describe('offline repertoire database', () => {
     expect((await loadRepertoire())?.songs[0].title).toBe('Importada')
     expect(await loadAudio('old-only')).toBeNull()
     expect(await (await loadAudio(metadata.id))?.text()).toBe('new audio')
+  })
+
+  it('atomically restores metadata and its matching cloud audio', async () => {
+    const restored = asBrowserBlob(new NodeBlob(['restored audio'], { type: 'audio/mpeg' }))
+
+    await replaceRepertoire([{ ...metadata, title: 'Da nuvem' }], new Map([[metadata.id, restored]]))
+
+    const stored = await loadRepertoire()
+    expect(stored?.songs[0].title).toBe('Da nuvem')
+    expect(await stored?.audio.get(metadata.id)?.text()).toBe('restored audio')
+  })
+
+  it('stores the private cloud profile key outside localStorage', async () => {
+    const key = '0f91fd6b-c6f5-4f39-a340-f6387bce8bc8'
+
+    await saveCloudKey(key)
+
+    expect(await loadCloudKey()).toBe(key)
+    expect(localStorage.length).toBe(0)
   })
 
   it('rolls metadata and audio back together when atomic replacement aborts', async () => {

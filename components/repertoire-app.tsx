@@ -9,6 +9,7 @@ import { SongEditor } from '@/components/song-editor'
 import { StageView } from '@/components/stage-view'
 import { TopBar } from '@/components/top-bar'
 import { useAudioPrefetch } from '@/hooks/use-audio-prefetch'
+import { useCloudSync } from '@/hooks/use-cloud-sync'
 import { useSongs } from '@/hooks/use-songs'
 import { useWakeLock } from '@/hooks/use-wake-lock'
 import { warmUpAudio } from '@/lib/audio-engine'
@@ -38,7 +39,9 @@ export function RepertoireApp() {
     removeSong,
     moveSong,
     replaceAll,
+    restoreAll,
   } = useSongs()
+  const cloud = useCloudSync(restoreAll)
 
   const [view, setView] = useState<AppView>('repertoire')
   const [selectedId, setSelectedId] = useState('')
@@ -180,6 +183,7 @@ export function RepertoireApp() {
           onExport={handleExport}
           onImport={handleImport}
           mutationsEnabled={ready}
+          cloud={cloud}
         />
       )}
 

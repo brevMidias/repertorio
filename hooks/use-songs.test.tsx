@@ -43,7 +43,7 @@ function requestResult<T>(request: IDBRequest<T>): Promise<T> {
 }
 
 async function seedCurrentMetadata(value: unknown): Promise<void> {
-  const db = await requestResult(indexedDB.open(DB_NAME, 2))
+  const db = await requestResult(indexedDB.open(DB_NAME, 3))
   const transaction = db.transaction(META_STORE, 'readwrite')
   transaction.objectStore(META_STORE).put(value, META_KEY)
   await new Promise<void>((resolve, reject) => {
@@ -246,6 +246,30 @@ describe('useSongs', () => {
     } finally {
       put.mockRestore()
     }
+  })
+
+  it('keeps restored cloud audio when replacing the whole repertoire', async () => {
+    await saveMetadata([metadata])
+    const { result } = renderHook(() => useSongs())
+    await waitFor(() => expect(result.current.ready).toBe(true))
+    const restored = browserBlob('restored cloud bytes')
+
+    act(() => {
+      result.current.restoreAll([{
+        ...result.current.songs[0],
+        title: 'Da nuvem',
+        audioBlob: restored,
+        audioUrl: 'blob:restored',
+      }])
+    })
+
+    await waitFor(async () => {
+      expect(await (await loadAudio(metadata.id))?.text()).toBe('restored cloud bytes')
+    })
+    expect(result.current.songs[0]).toEqual(expect.objectContaining({
+      title: 'Da nuvem',
+      audioBlob: restored,
+    }))
   })
 
   it('does not let an older autosave delete audio attached after it started', async () => {

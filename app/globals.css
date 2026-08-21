@@ -709,7 +709,7 @@ button:disabled {
 
 .prep-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
   gap: 12px;
 }
 
@@ -812,6 +812,57 @@ button:disabled {
 .backup-note {
   max-width: 60ch;
   font-size: 12px;
+}
+
+.cloud-panel {
+  margin-top: 24px;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--card);
+}
+
+.cloud-panel-heading,
+.cloud-actions,
+.cloud-code-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cloud-panel-heading {
+  justify-content: space-between;
+}
+
+.cloud-panel-heading h2 {
+  margin: 3px 0 0;
+  font-size: 20px;
+}
+
+.cloud-explanation {
+  margin: 18px 0 10px;
+  font-size: 12px;
+}
+
+.cloud-code-row label {
+  display: flex;
+  flex: 1;
+  min-width: 240px;
+  flex-direction: column;
+  gap: 7px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.cloud-code-row input {
+  width: 100%;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.cloud-panel > .import-ok,
+.cloud-panel > .import-error {
+  display: block;
+  margin: 12px 0 0;
 }
 
 /* ==========================================================================
@@ -1025,6 +1076,22 @@ textarea {
 
   .prep-grid {
     grid-template-columns: 1fr;
+  }
+
+  .cloud-panel-heading,
+  .cloud-code-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .cloud-actions {
+    flex-wrap: wrap;
+  }
+
+  .cloud-actions button,
+  .cloud-code-row button,
+  .cloud-code-row label {
+    width: 100%;
   }
 
   .form-grid {

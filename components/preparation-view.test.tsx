@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { PreparationView } from '@/components/preparation-view'
 import { RepertoireApp } from '@/components/repertoire-app'
+import type { CloudSyncController } from '@/hooks/use-cloud-sync'
 import type { Song } from '@/lib/types'
 
 const song: Song = {
@@ -24,7 +25,23 @@ const song: Song = {
 
 const originalStorage = Object.getOwnPropertyDescriptor(navigator, 'storage')
 
-function renderPreparation(storageStatus: Parameters<typeof PreparationView>[0]['storageStatus']) {
+function cloudController(overrides: Partial<CloudSyncController> = {}): CloudSyncController {
+  return {
+    cloudKey: '0f91fd6b-c6f5-4f39-a340-f6387bce8bc8',
+    ready: true,
+    busy: null,
+    feedback: null,
+    backup: vi.fn().mockResolvedValue(undefined),
+    restore: vi.fn().mockResolvedValue(undefined),
+    useCloudKey: vi.fn().mockResolvedValue(true),
+    ...overrides,
+  }
+}
+
+function renderPreparation(
+  storageStatus: Parameters<typeof PreparationView>[0]['storageStatus'],
+  cloud = cloudController(),
+) {
   return render(
     <PreparationView
       songs={[song]}
@@ -33,6 +50,7 @@ function renderPreparation(storageStatus: Parameters<typeof PreparationView>[0][
       onExport={vi.fn()}
       onImport={vi.fn()}
       mutationsEnabled
+      cloud={cloud}
     />,
   )
 }
@@ -90,5 +108,33 @@ describe('PreparationView storage protection', () => {
     await waitFor(() => expect(screen.getByText('Proteção limitada')).toBeTruthy())
     expect(screen.getByText(/1\.5 MB usados/)).toBeTruthy()
     expect(persist).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe('PreparationView cloud copy', () => {
+  it('backs up metadata and MP3 from the preparation screen', () => {
+    const cloud = cloudController()
+    renderPreparation({ persisted: true }, cloud)
+
+    fireEvent.click(screen.getByRole('button', { name: /salvar na vercel/i }))
+
+    expect(cloud.backup).toHaveBeenCalledWith([song])
+    expect(screen.getByText(/continua disponível offline/i)).toBeTruthy()
+  })
+
+  it('connects a copied code before restoring on another device', async () => {
+    const cloud = cloudController()
+    vi.spyOn(window, 'confirm').mockReturnValue(true)
+    renderPreparation({ persisted: true }, cloud)
+
+    const field = screen.getByLabelText(/código da nuvem/i)
+    fireEvent.change(field, { target: { value: '8dcba6fb-cea7-4d8a-a6a4-e832b28d33e0' } })
+    fireEvent.click(screen.getByRole('button', { name: /usar código/i }))
+    await waitFor(() => expect(cloud.useCloudKey).toHaveBeenCalledWith(
+      '8dcba6fb-cea7-4d8a-a6a4-e832b28d33e0',
+    ))
+
+    fireEvent.click(screen.getByRole('button', { name: /restaurar da vercel/i }))
+    expect(cloud.restore).toHaveBeenCalledTimes(1)
   })
 })
