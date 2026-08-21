@@ -1,0 +1,26 @@
+# v0 sandbox internal files
+__v0_runtime_loader.js
+__v0_devtools.tsx
+__v0_jsx-dev-runtime.ts
+.snowflake/
+.v0-trash/
+.vercel/
+
+# Environment variables
+.env*.local
+
+# Common ignores
+node_modules
+.next/
+.DS_Store
+
+# Gerado pelo Next a cada build
+next-env.d.ts
+
+# Caches de ferramentas
+*.tsbuildinfo
+.eslintcache
+
+# Relatórios locais de implementação
+.superpowers/
+docs/superpowers/
