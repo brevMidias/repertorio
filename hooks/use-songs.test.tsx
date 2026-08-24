@@ -101,6 +101,14 @@ afterEach(() => {
 })
 
 describe('useSongs', () => {
+  it('starts with an empty repertoire when this device has no saved data', async () => {
+    const { result } = renderHook(() => useSongs())
+
+    expect(result.current.songs).toEqual([])
+    await waitFor(() => expect(result.current.ready).toBe(true))
+    expect(result.current.songs).toEqual([])
+  })
+
   it('paints from the synchronous cache before hydrating from IndexedDB', async () => {
     writeMetaCache([{ ...metadata, title: 'Do cache' }])
     await saveMetadata([metadata])
@@ -492,7 +500,9 @@ describe('controller integration', () => {
 
       hydrationReleased = true
       pendingMetadata.resolve([metadata])
-      await waitFor(() => expect(screen.queryByText(/carregando repertório salvo/i)).toBeNull())
+      await waitFor(() => expect(
+        screen.queryByRole('status', { name: /carregando repertório/i }),
+      ).toBeNull())
 
       expect(importButton.disabled).toBe(false)
       const validFile = {
@@ -535,6 +545,7 @@ describe('controller integration', () => {
   })
 
   it('warms up audio in the same click that opens the stage', async () => {
+    await saveMetadata([metadata])
     const resume = vi.fn(async () => undefined)
     class AudioContextStub {
       state: AudioContextState = 'suspended'
@@ -543,10 +554,10 @@ describe('controller integration', () => {
     vi.stubGlobal('AudioContext', AudioContextStub)
 
     render(<RepertoireApp />)
-    fireEvent.click(screen.getByRole('button', { name: /abrir perfect no modo palco/i }))
+    fireEvent.click(await screen.findByRole('button', { name: /abrir do indexeddb no modo palco/i }))
 
     expect(resume).toHaveBeenCalledTimes(1)
-    expect(await screen.findByText('Perfect')).toBeTruthy()
+    expect(await screen.findByText('Do IndexedDB')).toBeTruthy()
   })
 
   it('shows persistence failures in a status region without discarding legacy state', async () => {

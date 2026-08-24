@@ -112,29 +112,21 @@ describe('PreparationView storage protection', () => {
 })
 
 describe('PreparationView cloud copy', () => {
-  it('backs up metadata and MP3 from the preparation screen', () => {
+  it('allows retrying the automatic metadata and MP3 synchronization', () => {
     const cloud = cloudController()
     renderPreparation({ persisted: true }, cloud)
 
-    fireEvent.click(screen.getByRole('button', { name: /salvar na vercel/i }))
+    fireEvent.click(screen.getByRole('button', { name: /sincronizar agora/i }))
 
     expect(cloud.backup).toHaveBeenCalledWith([song])
-    expect(screen.getByText(/continua disponível offline/i)).toBeTruthy()
+    expect(screen.getByText(/sincronização automática ativa/i)).toBeTruthy()
   })
 
-  it('connects a copied code before restoring on another device', async () => {
+  it('uses one shared repertoire without exposing a per-browser code', () => {
     const cloud = cloudController()
-    vi.spyOn(window, 'confirm').mockReturnValue(true)
     renderPreparation({ persisted: true }, cloud)
 
-    const field = screen.getByLabelText(/código da nuvem/i)
-    fireEvent.change(field, { target: { value: '8dcba6fb-cea7-4d8a-a6a4-e832b28d33e0' } })
-    fireEvent.click(screen.getByRole('button', { name: /usar código/i }))
-    await waitFor(() => expect(cloud.useCloudKey).toHaveBeenCalledWith(
-      '8dcba6fb-cea7-4d8a-a6a4-e832b28d33e0',
-    ))
-
-    fireEvent.click(screen.getByRole('button', { name: /restaurar da vercel/i }))
-    expect(cloud.restore).toHaveBeenCalledTimes(1)
+    expect(screen.queryByLabelText(/código da nuvem/i)).toBeNull()
+    expect(screen.getByText(/ao abrir em outro navegador/i)).toBeTruthy()
   })
 })

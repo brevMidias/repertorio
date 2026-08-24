@@ -10,7 +10,7 @@ PWA local-first para Chrome/Android. Letras, cifras e MP3 ficam no IndexedDB par
 4. Confirme que a Vercel adicionou `BLOB_READ_WRITE_TOKEN` ao projeto.
 5. Faça um novo deploy.
 
-Na tela **Preparação**, use **Salvar na Vercel**. Guarde o código da nuvem: ele funciona como a chave privada para restaurar a cópia em outro celular. Depois da restauração, os MP3 voltam ao IndexedDB e permanecem disponíveis offline.
+O repertório é carregado automaticamente da Vercel e toda criação, edição, exclusão ou troca de MP3 é sincronizada em seguida. O IndexedDB mantém uma cópia local para uso offline e para iniciar a reprodução sem esperar a rede. A tela **Preparação** também oferece **Sincronizar agora** e **Restaurar da Vercel** como ações de recuperação manual.
 
 ## Verificação local
 

@@ -7,6 +7,9 @@ const CLOUD_VERSION = 1
 const CLOUD_KEY_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/
 const SONG_ID_PATTERN = /^[A-Za-z0-9_-]{1,128}$/
 
+/** Perfil único do app. Assim todos os navegadores leem o mesmo repertório. */
+export const SHARED_CLOUD_KEY = '76e36c69-6dda-4c84-b3af-6870c0f5c9a9'
+
 export type CloudAudioEntry = {
   pathname: string
   fingerprint: string
@@ -169,11 +172,21 @@ export async function restoreFromCloud(
   cloudKey: string,
   transport: CloudTransport,
 ): Promise<Song[]> {
+  const restored = await readCloudSnapshot(cloudKey, transport)
+  if (!restored) throw new Error('Nenhum backup foi encontrado para este código.')
+  return restored
+}
+
+/** Lê a cópia compartilhada; `null` representa um repertório ainda não inicializado. */
+export async function readCloudSnapshot(
+  cloudKey: string,
+  transport: CloudTransport,
+): Promise<Song[] | null> {
   const normalizedKey = normalizeCloudKey(cloudKey)
   if (!normalizedKey) throw new Error('Código da nuvem inválido.')
 
   const raw = await transport.readManifest(normalizedKey)
-  if (!raw) throw new Error('Nenhum backup foi encontrado para este código.')
+  if (!raw) return null
   const manifest = parseCloudManifest(raw, normalizedKey)
 
   return Promise.all(manifest.songs.map(async (metadata) => {

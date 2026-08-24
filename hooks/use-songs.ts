@@ -14,7 +14,7 @@ import {
   saveMetadata,
 } from '@/lib/local-db'
 import { readMetaCache, writeMetaCache } from '@/lib/meta-cache'
-import { createEmptySong, SEED_SONGS } from '@/lib/seed'
+import { createEmptySong } from '@/lib/seed'
 import type { Song, SongMetadata } from '@/lib/types'
 
 const STORAGE_ERROR_MESSAGE =
@@ -53,7 +53,7 @@ function readLegacySongs(): SongMetadata[] | null {
 export function useSongs(): SongsController {
   const [songs, setSongs] = useState<Song[]>(() => {
     const cached = readMetaCache()
-    return cached?.map((metadata) => withAudio(metadata)) ?? SEED_SONGS
+    return cached?.map((metadata) => withAudio(metadata)) ?? []
   })
   const [ready, setReady] = useState(false)
   const [storageError, setStorageError] = useState<string | null>(null)

@@ -41,7 +41,8 @@ export function RepertoireApp() {
     replaceAll,
     restoreAll,
   } = useSongs()
-  const cloud = useCloudSync(restoreAll)
+  const cloud = useCloudSync(songs, ready, restoreAll)
+  const mutationsReady = ready && cloud.ready
 
   const [view, setView] = useState<AppView>('repertoire')
   const [selectedId, setSelectedId] = useState('')
@@ -139,9 +140,9 @@ export function RepertoireApp() {
     <main className={`app-shell font-sans size-${fontSize}`}>
       <TopBar menuOpen={menuOpen} onToggleMenu={() => setMenuOpen((open) => !open)} />
       <MainNav view={activeView} open={menuOpen} onChange={changeView} />
-      {!ready && (
+      {!mutationsReady && (
         <p role="status" aria-label="Carregando repertório" aria-live="polite">
-          Carregando repertório salvo… As edições serão liberadas em instantes.
+          Sincronizando repertório com a Vercel… As edições serão liberadas em instantes.
         </p>
       )}
       {storageError && <p role="status">{storageError}</p>}
@@ -155,7 +156,7 @@ export function RepertoireApp() {
           onMove={moveSong}
           onAdd={handleAdd}
           onExport={handleExport}
-          mutationsEnabled={ready}
+          mutationsEnabled={mutationsReady}
         />
       )}
 
@@ -182,7 +183,7 @@ export function RepertoireApp() {
           onEdit={setEditing}
           onExport={handleExport}
           onImport={handleImport}
-          mutationsEnabled={ready}
+          mutationsEnabled={mutationsReady}
           cloud={cloud}
         />
       )}
