@@ -150,7 +150,7 @@ describe('StageView audio', () => {
     expect(sources[0].start).toHaveBeenCalledWith(0, 12)
   })
 
-  it('pauses with fade, updates the timer, and resumes at the stopped position', async () => {
+  it('pauses with fade, updates the timer, and restarts at previewStart', async () => {
     await warmUpAudio()
     await prepareTrack('entrada', song().audioBlob!)
     renderStage()
@@ -165,7 +165,24 @@ describe('StageView audio', () => {
 
     expect(sources[0].stop).toHaveBeenCalled()
     fireEvent.click(screen.getByRole('button', { name: 'Ouvir referência' }))
-    expect(sources[1].start).toHaveBeenCalledWith(0, 17)
+    expect(sources[1].start).toHaveBeenCalledWith(0, 12)
+    expect(screen.getByRole('button', { name: 'Pausar · 00:12' })).toBeTruthy()
+  })
+
+  it('restarts from the beginning when previewStart is zero', async () => {
+    await warmUpAudio()
+    await prepareTrack('entrada', song().audioBlob!)
+    renderStage(song({ previewStart: 0 }))
+    fireEvent.click(screen.getByRole('button', { name: 'Ouvir referência' }))
+
+    act(() => {
+      contexts[0].currentTime = 9
+      vi.advanceTimersByTime(PLAYBACK_TICK_MS)
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Pausar · 00:09' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Ouvir referência' }))
+
+    expect(sources[1].start).toHaveBeenCalledWith(0, 0)
   })
 
   it('disables playback only when the song has no audio blob', () => {
@@ -175,5 +192,23 @@ describe('StageView audio', () => {
       (screen.getByRole('button', { name: 'Sem áudio de referência' }) as HTMLButtonElement)
         .disabled,
     ).toBe(true)
+  })
+})
+
+describe('StageView optional blocks', () => {
+  it('omits entry and notes when they are empty or only whitespace', () => {
+    renderStage(song({ entry: '', notes: '   ' }))
+
+    expect(screen.queryByText('ENTRADA')).toBeNull()
+    expect(screen.queryByText('OBSERVAÇÃO')).toBeNull()
+  })
+
+  it('shows entry and notes when they have content', () => {
+    renderStage(song({ entry: 'Após a leitura', notes: 'Refrão dobrado' }))
+
+    expect(screen.getByText('ENTRADA')).toBeTruthy()
+    expect(screen.getByText('Após a leitura')).toBeTruthy()
+    expect(screen.getByText('OBSERVAÇÃO')).toBeTruthy()
+    expect(screen.getByText('Refrão dobrado')).toBeTruthy()
   })
 })

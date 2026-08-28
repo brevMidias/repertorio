@@ -51,7 +51,6 @@ export function StageView({
 }: StageViewProps) {
   const keyControlRef = useRef<HTMLDivElement>(null)
   const touchStart = useRef<{ x: number; y: number } | null>(null)
-  const resumeOffset = useRef(0)
   const playRequest = useRef(0)
 
   // O componente é remontado a cada música (via `key` no pai), então o estado de
@@ -105,10 +104,9 @@ export function StageView({
   }, [index, onSelectIndex])
 
   const handleEnded = useCallback(() => {
-    resumeOffset.current = 0
-    setElapsed(0)
+    setElapsed(song.previewStart)
     setPlaying(false)
-  }, [])
+  }, [song.previewStart])
 
   const markPlaying = useCallback((offset: number) => {
     setElapsed(offset)
@@ -132,7 +130,8 @@ export function StageView({
   const prepareAndPlay = useCallback(async () => {
     if (!song.audioBlob) return
     const request = ++playRequest.current
-    const offset = resumeOffset.current || song.previewStart
+    // Todo play recomeça no ponto configurado: nunca retoma de onde pausou.
+    const offset = song.previewStart
     setPreparing(true)
 
     const awake = await warmUpAudio()
@@ -148,13 +147,13 @@ export function StageView({
 
     if (playing) {
       playRequest.current += 1
-      resumeOffset.current = stopTrack()
-      setElapsed(resumeOffset.current)
+      stopTrack()
+      setElapsed(song.previewStart)
       setPlaying(false)
       return
     }
 
-    const offset = resumeOffset.current || song.previewStart
+    const offset = song.previewStart
     if (isAudioReady(song.id) && playTrack(song.id, offset, handleEnded)) {
       markPlaying(offset)
       return
@@ -265,10 +264,12 @@ export function StageView({
         </button>
       </div>
 
-      <div className="entry-card">
-        <span>ENTRADA</span>
-        <p>{song.entry || 'Sem observação de entrada.'}</p>
-      </div>
+      {song.entry.trim() && (
+        <div className="entry-card">
+          <span>ENTRADA</span>
+          <p>{song.entry}</p>
+        </div>
+      )}
 
       {song.structure && (
         <div className="structure">
@@ -290,7 +291,7 @@ export function StageView({
         ))}
       </div>
 
-      {song.notes && (
+      {song.notes.trim() && (
         <div className="notes">
           <span>OBSERVAÇÃO</span>
           <p>{song.notes}</p>
