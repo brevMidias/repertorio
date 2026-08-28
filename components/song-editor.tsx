@@ -160,7 +160,7 @@ export function SongEditor({ song, onClose, onSave, onDelete }: SongEditorProps)
             Artista
             <input value={draft.artist} onChange={(event) => set('artist', event.target.value)} />
           </label>
-          <label>
+          <label className="wide">
             Momento da cerimônia
             <input value={draft.moment} onChange={(event) => set('moment', event.target.value)} />
           </label>
