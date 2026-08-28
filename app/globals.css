@@ -82,62 +82,19 @@ button:disabled {
    Cabeçalho e navegação
    ========================================================================== */
 
+/* Só o botão do menu vive aqui, então a barra aparece apenas no mobile. */
 .topbar {
   position: sticky;
   top: 0;
   z-index: 10;
-  display: flex;
+  display: none;
   align-items: center;
-  justify-content: space-between;
-  height: 78px;
+  justify-content: flex-end;
+  height: 62px;
   padding: 0 clamp(18px, 4vw, 56px);
   border-bottom: 1px solid var(--line);
   background: #111416e8;
   backdrop-filter: blur(14px);
-}
-
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 11px;
-}
-
-.brand-mark {
-  display: grid;
-  place-items: center;
-  width: 35px;
-  height: 35px;
-  color: var(--lime);
-  border: 1px solid #586b2c;
-  border-radius: 10px;
-}
-
-.brand strong {
-  display: block;
-  font-size: 15px;
-  letter-spacing: 0.18em;
-}
-
-.brand small {
-  display: block;
-  margin-top: 3px;
-  color: var(--muted);
-  font-size: 10px;
-}
-
-.event-label {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 0;
-  color: var(--muted);
-  font-size: 11px;
-  letter-spacing: 0.12em;
-}
-
-.event-label b {
-  color: var(--foreground);
-  font-weight: 500;
 }
 
 .main-nav {
@@ -471,8 +428,11 @@ button:disabled {
   margin-top: 42px;
 }
 
+/* O momento da cerimônia é a informação que o músico procura primeiro no palco. */
 .stage-title .eyebrow {
-  font-size: 12px;
+  margin-bottom: 12px;
+  font-size: clamp(17px, 2.6vw, 24px);
+  letter-spacing: 0.1em;
 }
 
 .stage-title h1 {
@@ -699,168 +659,6 @@ button:disabled {
 }
 
 /* ==========================================================================
-   Preparação
-   ========================================================================== */
-
-.prep-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-  gap: 12px;
-}
-
-.prep-card {
-  display: flex;
-  gap: 13px;
-  padding: 20px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  background: var(--card);
-}
-
-.prep-card > svg {
-  flex: none;
-  color: var(--lime);
-}
-
-.prep-card strong {
-  font-size: 14px;
-}
-
-.prep-card p {
-  margin: 7px 0 0;
-  color: var(--muted);
-  font-size: 12px;
-  line-height: 1.5;
-}
-
-.prep-list {
-  margin-top: 30px;
-  border-top: 1px solid var(--line);
-}
-
-.list-heading {
-  display: flex;
-  justify-content: space-between;
-  padding: 17px 4px;
-  font-size: 13px;
-}
-
-.list-heading span {
-  color: var(--muted);
-  font-size: 11px;
-}
-
-.prep-row {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  width: 100%;
-  padding: 16px 4px;
-  border: 0;
-  border-bottom: 1px solid var(--line);
-  background: transparent;
-  color: var(--foreground);
-  text-align: left;
-}
-
-.prep-row > span:nth-child(2) {
-  flex: 1;
-}
-
-.prep-row b,
-.prep-row small {
-  display: block;
-}
-
-.prep-row small {
-  margin-top: 4px;
-  color: var(--muted);
-  font-size: 12px;
-}
-
-.check {
-  color: var(--amber);
-}
-
-.check.done {
-  color: var(--lime);
-}
-
-.backup-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px;
-  margin-top: 24px;
-}
-
-.import-ok {
-  color: var(--lime);
-  font-size: 12px;
-}
-
-.import-error {
-  color: var(--danger);
-  font-size: 12px;
-}
-
-.backup-note {
-  max-width: 60ch;
-  font-size: 12px;
-}
-
-.cloud-panel {
-  margin-top: 24px;
-  padding: 20px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  background: var(--card);
-}
-
-.cloud-panel-heading,
-.cloud-actions,
-.cloud-code-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.cloud-panel-heading {
-  justify-content: space-between;
-}
-
-.cloud-panel-heading h2 {
-  margin: 3px 0 0;
-  font-size: 20px;
-}
-
-.cloud-explanation {
-  margin: 18px 0 10px;
-  font-size: 12px;
-}
-
-.cloud-code-row label {
-  display: flex;
-  flex: 1;
-  min-width: 240px;
-  flex-direction: column;
-  gap: 7px;
-  color: var(--muted);
-  font-size: 11px;
-}
-
-.cloud-code-row input {
-  width: 100%;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-}
-
-.cloud-panel > .import-ok,
-.cloud-panel > .import-error {
-  display: block;
-  margin: 12px 0 0;
-}
-
-/* ==========================================================================
    Editor
    ========================================================================== */
 
@@ -994,8 +792,8 @@ textarea {
    ========================================================================== */
 
 @media (max-width: 700px) {
-  .event-label {
-    display: none;
+  .topbar {
+    display: flex;
   }
 
   .mobile-menu {
@@ -1067,26 +865,6 @@ textarea {
 
   .chord-map {
     grid-template-columns: 1fr;
-  }
-
-  .prep-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .cloud-panel-heading,
-  .cloud-code-row {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .cloud-actions {
-    flex-wrap: wrap;
-  }
-
-  .cloud-actions button,
-  .cloud-code-row button,
-  .cloud-code-row label {
-    width: 100%;
   }
 
   .form-grid {

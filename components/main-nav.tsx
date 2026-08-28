@@ -1,13 +1,12 @@
 'use client'
 
-import { ListMusic, ShieldCheck, Volume2, type LucideIcon } from 'lucide-react'
+import { ListMusic, Volume2, type LucideIcon } from 'lucide-react'
 
 import type { AppView } from '@/lib/types'
 
 const NAV_ITEMS: { view: AppView; label: string; Icon: LucideIcon }[] = [
   { view: 'repertoire', label: 'Repertório', Icon: ListMusic },
   { view: 'stage', label: 'Modo palco', Icon: Volume2 },
-  { view: 'prep', label: 'Preparação', Icon: ShieldCheck },
 ]
 
 type MainNavProps = {

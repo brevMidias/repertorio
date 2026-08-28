@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { MainNav } from '@/components/main-nav'
-import { PreparationView } from '@/components/preparation-view'
 import { RepertoireList } from '@/components/repertoire-list'
 import { SongEditor } from '@/components/song-editor'
 import { StageView } from '@/components/stage-view'
@@ -15,11 +14,7 @@ import { useWakeLock } from '@/hooks/use-wake-lock'
 import { warmUpAudio } from '@/lib/audio-engine'
 import { downloadBackup } from '@/lib/backup'
 import { registerServiceWorker } from '@/lib/pwa'
-import {
-  readStorageStatus,
-  requestPersistentStorage,
-  type StorageStatus,
-} from '@/lib/storage-status'
+import { requestPersistentStorage } from '@/lib/storage-status'
 import type { AppView, FontSize, MusicalKey, Song } from '@/lib/types'
 
 const FONT_SIZE_CYCLE: Record<FontSize, FontSize> = {
@@ -38,7 +33,6 @@ export function RepertoireApp() {
     saveSong,
     removeSong,
     moveSong,
-    replaceAll,
     restoreAll,
   } = useSongs()
   const cloud = useCloudSync(songs, ready, restoreAll)
@@ -49,8 +43,7 @@ export function RepertoireApp() {
   const [editing, setEditing] = useState<Song | null>(null)
   const [fontSize, setFontSize] = useState<FontSize>('normal')
   const [menuOpen, setMenuOpen] = useState(false)
-  const [storageStatus, setStorageStatus] = useState<StorageStatus | null>(null)
-  const storageStatusRequest = useRef<Promise<StorageStatus> | null>(null)
+  const persistenceRequest = useRef<Promise<boolean> | null>(null)
 
   // A seleção cai na primeira música quando o id atual deixa de existir.
   const foundIndex = songs.findIndex((song) => song.id === selectedId)
@@ -65,16 +58,8 @@ export function RepertoireApp() {
 
   useEffect(() => {
     registerServiceWorker()
-
-    storageStatusRequest.current ??= requestPersistentStorage().then(() => readStorageStatus())
-    let active = true
-    void storageStatusRequest.current.then((status) => {
-      if (active) setStorageStatus(status)
-    })
-
-    return () => {
-      active = false
-    }
+    // O ref evita uma segunda solicitação no replay de efeitos do StrictMode.
+    persistenceRequest.current ??= requestPersistentStorage()
   }, [])
 
   const changeView = useCallback((next: AppView) => {
@@ -125,15 +110,6 @@ export function RepertoireApp() {
     setSelectedId(fallback?.id ?? '')
   }, [editing, ready, removeSong, selectedId, songs])
 
-  const handleImport = useCallback(
-    (imported: Song[]) => {
-      if (!ready) return
-      replaceAll(imported)
-      setSelectedId(imported[0]?.id ?? '')
-    },
-    [ready, replaceAll],
-  )
-
   const handleExport = useCallback(() => downloadBackup(songs), [songs])
 
   return (
@@ -173,18 +149,6 @@ export function RepertoireApp() {
           onSelectIndex={selectByIndex}
           onKeyChange={handleKeyChange}
           onCycleFontSize={() => setFontSize((current) => FONT_SIZE_CYCLE[current])}
-        />
-      )}
-
-      {activeView === 'prep' && (
-        <PreparationView
-          songs={songs}
-          storageStatus={storageStatus}
-          onEdit={setEditing}
-          onExport={handleExport}
-          onImport={handleImport}
-          mutationsEnabled={mutationsReady}
-          cloud={cloud}
         />
       )}
 

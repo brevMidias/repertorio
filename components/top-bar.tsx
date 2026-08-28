@@ -1,32 +1,19 @@
 'use client'
 
-import { Menu, Music2, X } from 'lucide-react'
-
-import { CEREMONY } from '@/lib/config'
+import { Menu, X } from 'lucide-react'
 
 type TopBarProps = {
   menuOpen: boolean
   onToggleMenu: () => void
 }
 
+/**
+ * Barra superior. Existe só para abrigar o botão do menu no mobile: no desktop
+ * a navegação já aparece inteira, então o CSS esconde a barra por lá.
+ */
 export function TopBar({ menuOpen, onToggleMenu }: TopBarProps) {
   return (
     <header className="topbar">
-      <div className="brand">
-        <span className="brand-mark" aria-hidden="true">
-          <Music2 size={19} />
-        </span>
-        <div>
-          <strong>PRIME</strong>
-          <small>repertório de cerimônia</small>
-        </div>
-      </div>
-
-      <p className="event-label">
-        <span>{CEREMONY.label}</span>
-        <b>{CEREMONY.date}</b>
-      </p>
-
       <button
         type="button"
         className="icon-button mobile-menu"

@@ -71,7 +71,7 @@ export type Song = {
  */
 export type SongMetadata = Omit<Song, 'audioBlob' | 'audioUrl'>
 
-export type AppView = 'repertoire' | 'stage' | 'prep'
+export type AppView = 'repertoire' | 'stage'
 
 export type FontSize = 'normal' | 'large' | 'xl'
 

@@ -1,9 +1,3 @@
-/** Dados da cerimônia exibidos no cabeçalho. */
-export const CEREMONY = {
-  label: 'CASAMENTO',
-  date: '24 AGO 2026',
-} as const
-
 /** Chave do `localStorage` usada antes da migração para IndexedDB. */
 export const LEGACY_STORAGE_KEY = 'prime-repertorio'
 

@@ -454,7 +454,7 @@ describe('useSongs', () => {
 })
 
 describe('controller integration', () => {
-  it('exposes loading feedback and disables add, edit, and import until hydration completes', async () => {
+  it('exposes loading feedback and disables add and edit until hydration completes', async () => {
     await saveMetadata([metadata])
     writeMetaCache([{ ...metadata, title: 'Do cache' }])
 
@@ -471,7 +471,7 @@ describe('controller integration', () => {
       })
 
     try {
-      const { container } = render(<RepertoireApp />)
+      render(<RepertoireApp />)
       const loading = screen.getByRole('status', { name: /carregando repertório/i })
       expect(loading.getAttribute('aria-live')).toBe('polite')
 
@@ -483,35 +483,12 @@ describe('controller integration', () => {
       fireEvent.click(edit)
       expect(screen.queryByRole('dialog')).toBeNull()
 
-      fireEvent.click(screen.getByRole('button', { name: 'Preparação' }))
-      const importButton = screen.getByRole('button', {
-        name: 'Importar backup',
-      }) as HTMLButtonElement
-      const importInput = container.querySelector<HTMLInputElement>('input[accept*="json"]')
-      expect(importButton.disabled).toBe(true)
-      expect(importInput?.disabled).toBe(true)
-      fireEvent.click(importButton)
-
-      const prematureFile = {
-        text: vi.fn(async () => JSON.stringify([{ ...metadata, title: 'Não importar' }])),
-      } as unknown as File
-      fireEvent.change(importInput!, { target: { files: [prematureFile] } })
-      expect(prematureFile.text).not.toHaveBeenCalled()
-
       hydrationReleased = true
       pendingMetadata.resolve([metadata])
       await waitFor(() => expect(
         screen.queryByRole('status', { name: /carregando repertório/i }),
       ).toBeNull())
 
-      expect(importButton.disabled).toBe(false)
-      const validFile = {
-        text: vi.fn(async () => JSON.stringify([{ ...metadata, title: 'Importação liberada' }])),
-      } as unknown as File
-      fireEvent.change(importInput!, { target: { files: [validFile] } })
-      expect(await screen.findByText('Importação liberada')).toBeTruthy()
-
-      fireEvent.click(screen.getByRole('button', { name: 'Repertório' }))
       const enabledAdd = screen.getByRole('button', { name: 'Nova música' }) as HTMLButtonElement
       expect(enabledAdd.disabled).toBe(false)
       fireEvent.click(enabledAdd)
