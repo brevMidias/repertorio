@@ -486,7 +486,6 @@ button:disabled {
   margin: 26px 0;
 }
 
-.stage-meta small,
 .key-control small,
 .entry-card span,
 .structure span,
@@ -497,10 +496,6 @@ button:disabled {
   color: var(--muted);
   font-size: 10px;
   letter-spacing: 0.15em;
-}
-
-.stage-meta strong {
-  font-size: 23px;
 }
 
 .key-control {

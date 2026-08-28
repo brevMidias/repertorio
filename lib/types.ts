@@ -47,7 +47,6 @@ export type Song = {
   key: MusicalKey
   /** Tom em que as cifras das seções estão escritas. */
   originalKey: MusicalKey
-  bpm: number
   status: SongStatus
   /** Instrução de entrada (deixa, sinal do celebrante...). */
   entry: string

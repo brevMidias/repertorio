@@ -12,7 +12,6 @@ const song: Song = {
   moment: 'Cerimônia',
   key: 'C',
   originalKey: 'C',
-  bpm: 72,
   status: 'Pronta',
   entry: '',
   notes: '',
@@ -51,7 +50,6 @@ describe('metadata cache', () => {
       expect.objectContaining({
         id: 'song-1',
         title: 'Entrada',
-        bpm: 72,
         previewStart: 0,
       }),
     ])
@@ -59,6 +57,7 @@ describe('metadata cache', () => {
     expect(raw).not.toContain('audioBlob')
     expect(raw).not.toContain('audioUrl')
     expect(raw).not.toContain('blob:entrada')
+    expect(raw).not.toContain('bpm')
   })
 
   it('keeps an empty repertoire distinct from a missing cache', () => {

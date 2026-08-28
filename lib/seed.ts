@@ -17,7 +17,6 @@ export function createEmptySong(): Song {
     moment: 'Momento da cerimônia',
     key: 'C',
     originalKey: 'C',
-    bpm: 72,
     status: 'Nova',
     entry: '',
     notes: '',

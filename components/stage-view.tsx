@@ -242,11 +242,6 @@ export function StageView({
           )}
         </div>
 
-        <div>
-          <small>BPM</small>
-          <strong>{song.bpm}</strong>
-        </div>
-
         <button
           type="button"
           className={`audio-button${playing ? ' is-playing' : ''}`}

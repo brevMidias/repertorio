@@ -27,7 +27,6 @@ const metadata: SongMetadata = {
   moment: 'Entrada',
   key: 'C',
   originalKey: 'C',
-  bpm: 72,
   status: 'Pronta',
   entry: 'Violão',
   notes: 'Nota de teste',

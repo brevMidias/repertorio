@@ -4,7 +4,7 @@ import type { Song } from '@/lib/types'
 
 const song: Song = {
   id: 'entrada', title: 'Entrada', artist: '', moment: '', key: 'C', originalKey: 'C',
-  bpm: 72, status: 'Nova', entry: '', notes: '', structure: '', sections: [],
+  status: 'Nova', entry: '', notes: '', structure: '', sections: [],
   previewStart: 12, audioName: 'entrada.mp3', audioUrl: 'blob:old',
   audioBlob: new Blob(['mp3'], { type: 'audio/mpeg' }),
 }

@@ -21,7 +21,6 @@ const metadata: SongMetadata = {
   moment: 'Entrada',
   key: 'C',
   originalKey: 'C',
-  bpm: 72,
   status: 'Pronta',
   entry: '',
   notes: '',
@@ -381,8 +380,9 @@ describe('useSongs', () => {
       await waitFor(() => expect(result.current.ready).toBe(true))
 
       expect(result.current.songs[0]).toEqual(
-        expect.objectContaining({ title: 'Do legado', bpm: 72 }),
+        expect.objectContaining({ title: 'Do legado' }),
       )
+      expect(result.current.songs[0]).not.toHaveProperty('bpm')
       expect(localStorage.getItem(LEGACY_STORAGE_KEY)).not.toBeNull()
       expect(result.current.storageError).toMatch(/não foi possível/i)
     } finally {

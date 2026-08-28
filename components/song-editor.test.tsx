@@ -11,7 +11,6 @@ const song: Song = {
   moment: 'Entrada',
   key: 'C',
   originalKey: 'C',
-  bpm: 72,
   status: 'Pronta',
   entry: '',
   notes: '',

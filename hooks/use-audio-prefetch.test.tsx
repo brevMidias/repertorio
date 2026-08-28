@@ -33,7 +33,6 @@ function song(id: string): Song {
     moment: '',
     key: 'C',
     originalKey: 'C',
-    bpm: 72,
     status: 'Pronta',
     entry: '',
     notes: '',

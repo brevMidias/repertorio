@@ -56,7 +56,6 @@ function normalizeSong(raw: unknown, index: number): SongMetadata {
   const song = asRecord(raw)
   const originalKey = toMusicalKey(song.originalKey)
   const sections = Array.isArray(song.sections) ? song.sections : []
-  const bpm = Number(song.bpm)
   const duration = Number(song.audioDuration)
 
   return {
@@ -66,7 +65,6 @@ function normalizeSong(raw: unknown, index: number): SongMetadata {
     moment: asString(song.moment),
     originalKey,
     key: toMusicalKey(song.key, originalKey),
-    bpm: Number.isFinite(bpm) && bpm > 0 ? Math.round(bpm) : 72,
     status: isSongStatus(song.status) ? song.status : 'Nova',
     entry: asString(song.entry),
     notes: asString(song.notes),

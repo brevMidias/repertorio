@@ -109,7 +109,6 @@ export function SongEditor({ song, onClose, onSave, onDelete }: SongEditorProps)
       title: draft.title.trim() || 'Sem título',
       artist: draft.artist.trim(),
       moment: draft.moment.trim(),
-      bpm: Number.isFinite(draft.bpm) && draft.bpm > 0 ? Math.round(draft.bpm) : 72,
       previewStart: Math.max(0, Number(draft.previewStart) || 0),
     }
 
@@ -198,16 +197,6 @@ export function SongEditor({ song, onClose, onSave, onDelete }: SongEditorProps)
                 </option>
               ))}
             </select>
-          </label>
-          <label>
-            BPM
-            <input
-              type="number"
-              min={20}
-              max={300}
-              value={draft.bpm}
-              onChange={(event) => set('bpm', Number(event.target.value))}
-            />
           </label>
           <label>
             Status
