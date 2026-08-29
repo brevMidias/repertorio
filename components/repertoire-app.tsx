@@ -6,7 +6,6 @@ import { MainNav } from '@/components/main-nav'
 import { RepertoireList } from '@/components/repertoire-list'
 import { SongEditor } from '@/components/song-editor'
 import { StageView } from '@/components/stage-view'
-import { TopBar } from '@/components/top-bar'
 import { useAudioPrefetch } from '@/hooks/use-audio-prefetch'
 import { useCloudSync } from '@/hooks/use-cloud-sync'
 import { useSongs } from '@/hooks/use-songs'
@@ -42,7 +41,6 @@ export function RepertoireApp() {
   const [selectedId, setSelectedId] = useState('')
   const [editing, setEditing] = useState<Song | null>(null)
   const [fontSize, setFontSize] = useState<FontSize>('normal')
-  const [menuOpen, setMenuOpen] = useState(false)
   const persistenceRequest = useRef<Promise<boolean> | null>(null)
 
   // A seleção cai na primeira música quando o id atual deixa de existir.
@@ -64,7 +62,6 @@ export function RepertoireApp() {
 
   const changeView = useCallback((next: AppView) => {
     setView(next)
-    setMenuOpen(false)
   }, [])
 
   const selectByIndex = useCallback(
@@ -114,8 +111,7 @@ export function RepertoireApp() {
 
   return (
     <main className={`app-shell font-sans size-${fontSize}`}>
-      <TopBar menuOpen={menuOpen} onToggleMenu={() => setMenuOpen((open) => !open)} />
-      <MainNav view={activeView} open={menuOpen} onChange={changeView} />
+      <MainNav view={activeView} onChange={changeView} />
       {!mutationsReady && (
         <p role="status" aria-label="Carregando repertório" aria-live="polite">
           Sincronizando repertório com a Vercel… As edições serão liberadas em instantes.

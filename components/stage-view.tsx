@@ -127,6 +127,12 @@ export function StageView({
     }
   }, [song.id])
 
+  // Trocar de música tem que abrir a cifra pelo começo: sem isso a página herda
+  // a rolagem da anterior, que estava no rodapé onde fica o botão "Próxima".
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [song.id])
+
   const prepareAndPlay = useCallback(async () => {
     if (!song.audioBlob) return
     const request = ++playRequest.current

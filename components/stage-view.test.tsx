@@ -194,6 +194,23 @@ describe('StageView audio', () => {
   })
 })
 
+describe('StageView scroll position', () => {
+  it('opens every song at the top of the page', () => {
+    const scrollTo = vi.mocked(window.scrollTo)
+    scrollTo.mockClear()
+
+    const { unmount } = renderStage(song({ id: 'primeira' }))
+    expect(scrollTo).toHaveBeenLastCalledWith(0, 0)
+
+    // O pai troca a `key` a cada música, então a próxima entra remontada.
+    unmount()
+    scrollTo.mockClear()
+    renderStage(song({ id: 'segunda' }))
+
+    expect(scrollTo).toHaveBeenCalledWith(0, 0)
+  })
+})
+
 describe('StageView optional blocks', () => {
   it('omits entry and notes when they are empty or only whitespace', () => {
     renderStage(song({ entry: '', notes: '   ' }))

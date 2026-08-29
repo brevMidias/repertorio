@@ -45,11 +45,12 @@ describe('RepertoireApp chrome', () => {
     expect(screen.queryByRole('button', { name: 'Preparação' })).toBeNull()
   })
 
-  it('keeps the header free of branding and ceremony data', () => {
+  it('keeps the header free of branding, ceremony data, and a menu toggle', () => {
     render(<RepertoireApp />)
 
     expect(screen.queryByText('PRIME')).toBeNull()
     expect(screen.queryByText('repertório de cerimônia')).toBeNull()
     expect(screen.queryByText('CASAMENTO')).toBeNull()
+    expect(screen.queryByRole('button', { name: /menu/i })).toBeNull()
   })
 })

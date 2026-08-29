@@ -79,23 +79,8 @@ button:disabled {
 }
 
 /* ==========================================================================
-   Cabeçalho e navegação
+   Navegação
    ========================================================================== */
-
-/* Só o botão do menu vive aqui, então a barra aparece apenas no mobile. */
-.topbar {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  display: none;
-  align-items: center;
-  justify-content: flex-end;
-  height: 62px;
-  padding: 0 clamp(18px, 4vw, 56px);
-  border-bottom: 1px solid var(--line);
-  background: #111416e8;
-  backdrop-filter: blur(14px);
-}
 
 .main-nav {
   display: flex;
@@ -237,10 +222,6 @@ button:disabled {
   background: transparent;
   color: var(--lime);
   font-size: 12px;
-}
-
-.mobile-menu {
-  display: none;
 }
 
 /* ==========================================================================
@@ -792,28 +773,6 @@ textarea {
    ========================================================================== */
 
 @media (max-width: 700px) {
-  .topbar {
-    display: flex;
-  }
-
-  .mobile-menu {
-    display: grid;
-  }
-
-  .main-nav {
-    display: none;
-    flex-direction: column;
-    padding: 9px 18px;
-  }
-
-  .main-nav.open {
-    display: flex;
-  }
-
-  .main-nav button {
-    justify-content: flex-start;
-  }
-
   .content {
     padding-top: 30px;
   }

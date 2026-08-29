@@ -11,13 +11,13 @@ const NAV_ITEMS: { view: AppView; label: string; Icon: LucideIcon }[] = [
 
 type MainNavProps = {
   view: AppView
-  open: boolean
   onChange: (view: AppView) => void
 }
 
-export function MainNav({ view, open, onChange }: MainNavProps) {
+/** Duas abas cabem na tela mais estreita, então a navegação fica sempre visível. */
+export function MainNav({ view, onChange }: MainNavProps) {
   return (
-    <nav id="main-nav" className={`main-nav${open ? ' open' : ''}`} aria-label="Seções do aplicativo">
+    <nav className="main-nav" aria-label="Seções do aplicativo">
       {NAV_ITEMS.map(({ view: item, label, Icon }) => (
         <button
           key={item}
